@@ -5603,7 +5603,6 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
      */
     play: function() {
         if (this.played) {
-            this._element.pause();
             this.currentTime = 0;
             this._element.play();
         } else {
