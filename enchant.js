@@ -5595,14 +5595,22 @@ enchant.DOMSound = enchant.Class.create(enchant.EventTarget, {
          * @type Number
          */
         this.duration = 0;
+        this.played = false;
         throw new Error("Illegal Constructor");
     },
     /**
      * Begin playing.
      */
     play: function() {
-        if (this._element) {
+        if (this.played) {
+            this._element.pause();
+            this.currentTime = 0;
             this._element.play();
+        } else {
+            if (this._element) {
+                this._element.play();
+                this.played = true;
+            }
         }
     },
     /**
