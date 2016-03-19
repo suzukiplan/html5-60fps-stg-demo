@@ -30,6 +30,7 @@ MY.mainloop = function() {
     MY.movePlayer();
     MY.movePShot();
     MY.moveEnemy();
+    MY.moveBomb();
 }
 
 // ヒット・エフェクトの移動
@@ -210,6 +211,42 @@ MY.addHit = function(x, y) {
     MY.g.rootScene.addChild(h.s);
 }
 
+// 爆破エフェクトを追加
+MY.addBomb = function(type, x, y, vx, vy) {
+    var i = MY.bomb.length;
+    MY.bomb[i] = new Object();
+    var b = MY.bomb[i];
+    b.vx = vx;
+    b.vy = vy;
+    switch (type) {
+        case 0:
+            MY.a.bomb0.play();
+            b.s = new Sprite(48,48);
+            b.s.image = MY.g.assets["image/bomb0.png"];
+            b.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 12, 13, 14, null];
+            break;
+    }
+    b.frame = b.s.frame.length;
+    b.s.x = x;
+    b.s.y = y;
+    MY.g.rootScene.addChild(b.s);
+}
+
+// 爆破エフェクトの移動
+MY.moveBomb = function() {
+    for (var i = 0; i < MY.bomb.length; i++) {
+        var b = MY.bomb[i];
+        b.s.x += b.vx;
+        b.s.y += b.vy;
+        b.frame--;
+        if (0 == b.frame) {
+            b.s.remove();
+            MY.bomb.splice(i, 1);
+            i--;
+        }
+    }
+}
+
 // 敵の移動
 MY.moveEnemy = function() {
     for (var i = 0; i < MY.enemy.length; i++) {
@@ -218,8 +255,10 @@ MY.moveEnemy = function() {
             for (var j = 0; j < e.sprites.length; j++) e.sprites[j].remove();
             MY.enemy.splice(i, 1);
             i--;
+            continue;
         } else {
             // ショットとの当たり判定
+            var enemyDead = false;
             for (var j = 0; j < MY.pshot.length; j++) {
                 var p = MY.pshot[j];
                 for (var k = 0; k < e.hits.length; k++) {
@@ -229,10 +268,24 @@ MY.moveEnemy = function() {
                         p.s.remove();
                         MY.pshot.splice(j, 1);
                         j--;
-                        // todo: 敵のダメージを減らす処理
+                        e.hp--;
+                        if (0 == e.hp) enemyDead = true;
                         break;
                     }
                 }
+                if (enemyDead) break;
+            }
+            // 敵撃破の演出
+            if (enemyDead) {
+                switch (e.btype) {
+                    case 0:
+                        MY.addBomb(0, e.s.x + (e.width - 48) / 2, e.s.y + (e.height - 48) / 2, 0, -2);
+                        break;
+                }
+                for (var j = 0; j < e.sprites.length; j++) e.sprites[j].remove();
+                MY.enemy.splice(i, 1);
+                i--;
+                continue;
             }
         }
     }
@@ -245,11 +298,15 @@ MY.addEnemy = function(n, x, y) {
     var e = MY.enemy[i];
     e.x = x;
     e.y = y;
+    var width;
+    var height;
     switch (n) {
         case 0:
             e.frame = 0;
             e.vx = 0;
             e.alg = MY.enemyAlg0;
+            width = 24;
+            height = 24;
             e.s = new Sprite(24, 24);
             e.s.image = MY.g.assets["image/enemy0.png"];
             e.s.x = x;
@@ -259,8 +316,12 @@ MY.addEnemy = function(n, x, y) {
             e.s.frame = [e.fs[e.fpos]];
             e.sprites = [e.s];
             e.hits = [[5, 3, 20, 20]];
+            e.hp = 2;
+            e.btype = 0;
             break;
     }
+    e.width = width;
+    e.height = height;
     for (i = 0; i < e.sprites.length; i++) {
         MY.g.rootScene.addChild(e.sprites[i]);
     }
@@ -270,7 +331,7 @@ MY.addEnemy = function(n, x, y) {
 MY.enemyAlg0 = function(e) {
     e.frame++;
     // 下へ移動
-    e.y += 3;
+    e.y += 2;
     if (360 < e.y) return false;
     e.s.y = e.y;
     // 自機を追いかける(慣性付き)
@@ -309,8 +370,9 @@ onload = function() {
         "image/player.png", "image/option.png", "image/fire1.png",
         "image/pshot0.png", "image/pshot1.png", "image/pshot2.png", "image/pshot3.png", "image/pshot4.png",
         "image/enemy0.png",
+        "image/bomb0.png",
         "image/hit.png",
-        "audio/pshot.ogg", "audio/hit.ogg"
+        "audio/pshot.ogg", "audio/hit.ogg", "audio/bomb0.ogg"
     ]);
     MY.g.onload = function() {
         MY.g.rootScene.backgroundColor = "#050a40";
@@ -319,6 +381,7 @@ onload = function() {
         MY.pshot = new Array();
         MY.enemy = new Array();
         MY.hit = new Array();
+        MY.bomb = new Array();
         MY.frame = 0;;
         MY.g.keybind('z'.charCodeAt(0), 'a');
         MY.g.keybind('Z'.charCodeAt(0), 'a');
@@ -339,6 +402,7 @@ MY.initAudio = function() {
     }
     MY.a.pshot.i = 0;
     MY.a.hit = MY.g.assets['audio/hit.ogg'].clone();
+    MY.a.bomb0 = MY.g.assets['audio/bomb0.ogg'];
 }
 
 // プレイヤーの初期化
