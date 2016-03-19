@@ -197,9 +197,7 @@ MY.movePShot = function() {
 
 // ショット x 敵 の ヒット・エフェクト を追加
 MY.addHit = function(x, y) {
-    if (MY.a.hit.p) MY.a.hit.a.stop();
-    MY.a.hit.a.play();
-    MY.a.hit.p = true;
+    MY.a.hit.play();
     var i = MY.hit.length;
     MY.hit[i] = new Object();
     var h = MY.hit[i];
@@ -339,10 +337,8 @@ MY.initAudio = function() {
     for (i = 0; i < 8; i++) {
         MY.a.pshot.w[i] = MY.g.assets['audio/pshot.ogg'].clone();
     }
-    MY.a.hit = new Object();
-    MY.a.hit.a = MY.g.assets['audio/hit.ogg'].clone();
-    MY.a.hit.p = false;
     MY.a.pshot.i = 0;
+    MY.a.hit = MY.g.assets['audio/hit.ogg'].clone();
 }
 
 // プレイヤーの初期化
