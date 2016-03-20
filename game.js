@@ -212,21 +212,33 @@ MY.addHit = function(x, y) {
 }
 
 // 爆破エフェクトを追加
-MY.addBomb = function(type, x, y, vx, vy) {
+MY.addBomb = function(type, x, y, vx, vy, vxa, vya, af) {
     var i = MY.bomb.length;
     MY.bomb[i] = new Object();
     var b = MY.bomb[i];
     b.vx = vx;
     b.vy = vy;
+    b.vxa = vxa ? vxa : 0;
+    b.vya = vya ? vya : 0;
+    b.af = af ? af : 0;
     switch (type) {
         case 0:
             MY.a.bomb0.play();
-            b.s = new Sprite(48,48);
+            b.s = new Sprite(64, 64);
             b.s.image = MY.g.assets["image/bomb0.png"];
             b.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 12, 13, 14, null];
+            b.frame = 28;
+            for (var j = 0; j < 8; j++) {
+                MY.addBomb(1, x + 28, y + 28, Math.random() * 16 - 8, Math.random() * 16 - 8, Math.random() - 0.5, Math.random() - 0.5, -0.04);
+            }
+            break;
+        case 1:
+            b.s = new Sprite(8, 8);
+            b.s.image = MY.g.assets["image/bomb1.png"];
+            b.s.frame = [0, 1, 2, 3];
+            b.frame = 16;
             break;
     }
-    b.frame = b.s.frame.length;
     b.s.x = x;
     b.s.y = y;
     MY.g.rootScene.addChild(b.s);
@@ -238,8 +250,11 @@ MY.moveBomb = function() {
         var b = MY.bomb[i];
         b.s.x += b.vx;
         b.s.y += b.vy;
+        b.s.opacity += b.af;
+        b.vx += b.vxa;
+        b.vy += b.vya;
         b.frame--;
-        if (0 == b.frame) {
+        if (0 === b.frame) {
             b.s.remove();
             MY.bomb.splice(i, 1);
             i--;
@@ -279,7 +294,7 @@ MY.moveEnemy = function() {
             if (enemyDead) {
                 switch (e.btype) {
                     case 0:
-                        MY.addBomb(0, e.s.x + (e.width - 48) / 2, e.s.y + (e.height - 48) / 2, 0, -2);
+                        MY.addBomb(0, e.s.x + (e.width - 64) / 2, e.s.y + (e.height - 64) / 2, 0, -2);
                         break;
                 }
                 for (var j = 0; j < e.sprites.length; j++) e.sprites[j].remove();
@@ -370,7 +385,7 @@ onload = function() {
         "image/player.png", "image/option.png", "image/fire1.png",
         "image/pshot0.png", "image/pshot1.png", "image/pshot2.png", "image/pshot3.png", "image/pshot4.png",
         "image/enemy0.png",
-        "image/bomb0.png",
+        "image/bomb0.png", "image/bomb1.png",
         "image/hit.png",
         "audio/pshot.ogg", "audio/hit.ogg", "audio/bomb0.ogg"
     ]);
