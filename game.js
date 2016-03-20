@@ -232,7 +232,9 @@ MY.addBomb = function(type, x, y, vx, vy, vxa, vya, af) {
                 MY.addBomb(2, x + Math.random() * 40, y + Math.random() * 40, Math.random() - 0.5, -(Math.random() * 4));
             }
             for (var j = 0; j < 12; j++) {
-                MY.addBomb(1, x + 28, y + 28, Math.random() * 16 - 8, Math.random() * 16 - 8, Math.random() * 2 - 1, -Math.random() - 0.5, -0.04);
+                vx = Math.random() * 16 - 8;
+                vy = Math.random() * 16 - 8;
+                MY.addBomb(1, x + 28, y + 28, vx, vy, -vx / 20, -vy / 20, -0.04);
             }
             break;
         case 1:
