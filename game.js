@@ -48,13 +48,14 @@ MY.moveHit = function() {
 
 // プレイヤーの移動
 MY.movePlayer = function() {
+    var mv = MY.g.input.c ? 1 : 4;
     // body
     if (MY.g.input.left) {
-        MY.player.s.x -= 4;
+        MY.player.s.x -= mv;
         if (MY.player.s.x < 0) MY.player.s.x = 0;
         if (0 < MY.player.b) MY.player.b--;
     } else if (MY.g.input.right) {
-        MY.player.s.x += 4;
+        MY.player.s.x += mv;
         if (284 < MY.player.s.x) MY.player.s.x = 284;
         if (MY.player.b < 35) MY.player.b++;
     } else {
@@ -66,15 +67,15 @@ MY.movePlayer = function() {
     var k = parseInt(MY.player.b / 4);
     MY.player.s.frame = MY.player.f[k];
     if (MY.g.input.up) {
-        MY.player.s.y -= 4;
+        MY.player.s.y -= mv;
         if (MY.player.s.y < 0) MY.player.s.y = 0;
     } else if (MY.g.input.down) {
-        MY.player.s.y += 4;
+        MY.player.s.y += mv;
         if (284 < MY.player.s.y) MY.player.s.y = 284;
     }
 
     // options
-    var n = Math.abs(k - 4);
+    var n = MY.g.input.c ? -1 : Math.abs(k - 4);
     MY.player.o1.x = MY.player.s.x - 4 - n * 3;
     MY.player.o1.y = MY.player.s.y - 13 + n * 4;
     MY.player.o2.x = MY.player.s.x + 16 + n * 3;
@@ -93,6 +94,7 @@ MY.movePlayer = function() {
             MY.player.ps++;
             switch (n) {
                 case 0:
+                case -1:
                     MY.addPShot(MY.player.o1.x - 4, MY.player.o1.y, 2);
                     MY.addPShot(MY.player.o2.x - 4, MY.player.o2.y, 2);
                     break;
@@ -413,6 +415,9 @@ onload = function() {
         MY.g.keybind('Z'.charCodeAt(0), 'a');
         MY.g.keybind('x'.charCodeAt(0), 'b');
         MY.g.keybind('X'.charCodeAt(0), 'b');
+        MY.g.keybind('c'.charCodeAt(0), 'c');
+        MY.g.keybind('C'.charCodeAt(0), 'c');
+        MY.g.keybind(16, 'c');
         MY.g.rootScene.addEventListener(Event.ENTER_FRAME, MY.mainloop);
     }
     MY.g.start();
