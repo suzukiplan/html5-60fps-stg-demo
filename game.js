@@ -394,8 +394,9 @@ MY.addEnemy = function(n, x, y) {
 // 敵アルゴリズム0: 雑魚1
 MY.enemyAlg0 = function(e) {
     e.frame++;
-    if (1 === e.frame % 20 && e.frame < 100) {
+    if (8 === e.frame % 20 && e.frame < 50) {
         MY.addEShot0(e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5, 3.14 / 2, true);
+        MY.addEShot1(e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 1, 8, 0.1, 0, false);
         /*
         MY.addEShot0(e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5);
         MY.addEShot0(e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5, 0.3);
@@ -446,13 +447,11 @@ MY.moveEShot = function() {
     }
 }
 
-// 敵ショットの追加 (小さめの自機狙い / 自機外し / 固定方向弾)
+// 小さめの固定速度/敵弾の追加 (自機狙い / 自機外し / 固定方向弾)
 MY.addEShot0 = function(x, y, spd, rad, fix) {
     var i = MY.eshot.length;
     MY.eshot[i] = new Object();
     var e = MY.eshot[i];
-    e.x = x;
-    e.y = y;
     e.alg = MY.eshotAlg0;
     e.width = 12;
     e.height = 12;
@@ -461,7 +460,7 @@ MY.addEShot0 = function(x, y, spd, rad, fix) {
     e.s.x = x;
     e.s.y = y;
     e.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
-    e.hit = undefined;
+    e.hit = [4, 4, 8, 8];
     var pi;
     if (fix) {
         e.vx = Math.cos(rad) * spd;
@@ -474,10 +473,46 @@ MY.addEShot0 = function(x, y, spd, rad, fix) {
     MY.g.rootScene.addChild(e.s);
 }
 
+// 小さめの加速/敵弾の追加 (自機狙い / 自機外し / 固定方向弾)
+MY.addEShot1 = function(x, y, spd, max, intr, rad, fix) {
+    var i = MY.eshot.length;
+    MY.eshot[i] = new Object();
+    var e = MY.eshot[i];
+    e.spd = spd;
+    e.max = max;
+    e.intr = intr;
+    e.alg = MY.eshotAlg1;
+    e.width = 12;
+    e.height = 12;
+    e.s = new Sprite(12, 12);
+    e.s.image = MY.g.assets["image/eshot0.png"];
+    e.s.x = x;
+    e.s.y = y;
+    e.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
+    e.hit = [4, 4, 8, 8];
+    if (fix) {
+        e.rad = rad;
+    } else {
+        e.rad = Math.atan2(MY.player.s.y + 17 - e.s.y - 5, MY.player.s.x + 17 - e.s.x - 5);
+        e.rad += rad ? rad : 0;
+    }
+    MY.g.rootScene.addChild(e.s);
+}
+
 // 単純な方向弾
 MY.eshotAlg0 = function(e) {
     e.s.x += e.vx;
     e.s.y += e.vy;
+    return !(360 < e.s.x || 360 < e.s.y || e.s.x < -e.width || e.s.y < -e.height);
+}
+
+// 加速弾
+MY.eshotAlg1 = function(e) {
+    var vx = Math.cos(e.rad) * e.spd;
+    var vy = Math.sin(e.rad) * e.spd;
+    e.s.x += vx;
+    e.s.y += vy;
+    if (e.spd < e.max) e.spd += e.intr;
     return !(360 < e.s.x || 360 < e.s.y || e.s.x < -e.width || e.s.y < -e.height);
 }
 
