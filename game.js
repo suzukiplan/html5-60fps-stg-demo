@@ -396,6 +396,8 @@ MY.enemyAlg0 = function(e) {
     e.frame++;
     if (1 === e.frame % 20 && e.frame < 100) {
         MY.addEShot(0, e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5);
+        MY.addEShot(0, e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5, 0.3);
+        MY.addEShot(0, e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5, -0.3);
     }
     // 下へ移動
     e.y += 2;
@@ -442,7 +444,7 @@ MY.moveEShot = function() {
 }
 
 // 敵ショットの追加
-MY.addEShot = function(n, x, y, spd) {
+MY.addEShot = function(n, x, y, spd, rad) {
     var i = MY.eshot.length;
     MY.eshot[i] = new Object();
     var e = MY.eshot[i];
@@ -451,7 +453,7 @@ MY.addEShot = function(n, x, y, spd) {
     var width;
     var height;
     switch (n) {
-        case 0: // 自機狙い
+        case 0: // 自機狙い & 自機外し
             e.alg = MY.eshotAlg0;
             width = 12;
             height = 12;
@@ -462,9 +464,8 @@ MY.addEShot = function(n, x, y, spd) {
             e.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
             e.hit = undefined;
             var pi = Math.atan2(MY.player.s.y + 17 - e.s.y - 5, MY.player.s.x + 17 - e.s.x - 5);
-            e.vx = Math.cos(pi) * spd;
-            e.vy = Math.sin(pi) * spd;
-            console.log(pi + ": " + e.vx + ", " +e.vy);
+            e.vx = Math.cos(pi + (rad ? rad : 0)) * spd;
+            e.vy = Math.sin(pi + (rad ? rad : 0)) * spd;
             break;
     }
     e.width = width;
