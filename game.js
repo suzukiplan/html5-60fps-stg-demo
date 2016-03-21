@@ -75,7 +75,12 @@ MY.movePlayer = function() {
     }
 
     // options
-    var n = MY.g.input.c ? -1 : Math.abs(k - 4);
+    if (MY.g.input.c) {
+        if (MY.player.op !== 0) MY.player.op--;
+    } else {
+        if (16 !== MY.player.op) MY.player.op++;
+    }
+    var n = parseInt((MY.player.op) / 4) - 1;
     MY.player.o1.x = MY.player.s.x - 4 - n * 3;
     MY.player.o1.y = MY.player.s.y - 13 + n * 4;
     MY.player.o2.x = MY.player.s.x + 16 + n * 3;
@@ -449,6 +454,7 @@ MY.initPlayer = function() {
     MY.player.s.x = (320 - 36) / 2;
     MY.player.s.y = 280;
     MY.g.rootScene.addChild(MY.player.s);
+    MY.player.op = 16;
 
     MY.player.o1 = new Sprite(24, 24);
     MY.player.o1.image = MY.g.assets["image/option.png"];
