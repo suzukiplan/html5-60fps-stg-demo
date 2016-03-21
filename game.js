@@ -46,6 +46,21 @@ MY.moveHit = function() {
     }
 }
 
+// プレイヤーの残像を追加
+MY.addPAfer = function(f, x, y) {
+    var i = MY.pafter.length;
+    MY.pafter[i] = new Object();
+    var p = MY.pafter[i];
+    p.s = new Sprite(36, 36);
+    p.s.image = MY.g.assets["image/pafter.png"];
+    p.s.frame = MY.player.f[f];
+    p.s.x = x;
+    p.s.y = y;
+    p.frame = 16;
+    MY.g.rootScene.addChild(p.s);
+    MY.g.rootScene.insertBefore(p.s, MY.player.s);
+}
+
 // プレイヤーの移動
 MY.movePlayer = function() {
     var mv = MY.g.input.c ? 1 : 4;
@@ -77,6 +92,9 @@ MY.movePlayer = function() {
     // options
     if (MY.g.input.c) {
         if (MY.player.op !== 0) MY.player.op--;
+        if (MY.frame % 3 === 0) {
+            MY.addPAfer(k, MY.player.s.x, MY.player.s.y);
+        }
     } else {
         if (16 !== MY.player.op) MY.player.op++;
     }
@@ -149,6 +167,18 @@ MY.movePlayer = function() {
     } else {
         MY.player.f1.visible = false;
         MY.player.f2.visible = false;
+    }
+    // 残像を消す
+    for (var i = 0; i < MY.pafter.length; i++) {
+        var p = MY.pafter[i];
+        p.frame--;
+        if (0 !== p.frame) {
+            p.s.opacity -= 0.05;
+        } else {
+            p.s.remove();
+            MY.pafter.splice(i, 1);
+            i--;
+        }
     }
 }
 
@@ -400,7 +430,7 @@ onload = function() {
     MY.g = new Game(320, 320);
     MY.g.fps = 60;
     MY.g.preload([
-        "image/player.png", "image/option.png", "image/fire1.png",
+        "image/player.png", "image/option.png", "image/fire1.png", "image/pafter.png",
         "image/pshot0.png", "image/pshot1.png", "image/pshot2.png", "image/pshot3.png", "image/pshot4.png",
         "image/enemy0.png",
         "image/bomb0.png", "image/bomb1.png", "image/bomb2.png",
@@ -415,6 +445,7 @@ onload = function() {
         MY.enemy = new Array();
         MY.hit = new Array();
         MY.bomb = new Array();
+        MY.pafter = new Array();
         MY.frame = 0;;
         MY.g.keybind('z'.charCodeAt(0), 'a');
         MY.g.keybind('Z'.charCodeAt(0), 'a');
