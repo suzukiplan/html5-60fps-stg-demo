@@ -30,6 +30,7 @@ MY.mainloop = function() {
     MY.movePlayer();
     MY.movePShot();
     MY.moveEnemy();
+    MY.moveEShot();
     MY.moveBomb();
 }
 
@@ -393,6 +394,9 @@ MY.addEnemy = function(n, x, y) {
 // 敵アルゴリズム0: 雑魚1
 MY.enemyAlg0 = function(e) {
     e.frame++;
+    if (1 === e.frame % 20 && e.frame < 100) {
+        MY.addEShot(0, e.s.x + (e.width - 12) / 2, e.s.y + e.height - 6, 5);
+    }
     // 下へ移動
     e.y += 2;
     if (360 < e.y) return false;
@@ -423,6 +427,58 @@ MY.enemyAlg0 = function(e) {
     return true;
 }
 
+// 敵の移動
+MY.moveEShot = function() {
+    for (var i = 0; i < MY.eshot.length; i++) {
+        var e = MY.eshot[i];
+        if (!e.alg(e)) {
+            e.s.remove();
+            MY.eshot.splice(i , 1);
+            i--;
+            continue;
+        }
+        // todo: 当たり判定
+    }
+}
+
+// 敵ショットの追加
+MY.addEShot = function(n, x, y, spd) {
+    var i = MY.eshot.length;
+    MY.eshot[i] = new Object();
+    var e = MY.eshot[i];
+    e.x = x;
+    e.y = y;
+    var width;
+    var height;
+    switch (n) {
+        case 0: // 自機狙い
+            e.alg = MY.eshotAlg0;
+            width = 12;
+            height = 12;
+            e.s = new Sprite(12, 12);
+            e.s.image = MY.g.assets["image/eshot0.png"];
+            e.s.x = x;
+            e.s.y = y;
+            e.s.frame = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
+            e.hit = undefined;
+            var pi = Math.atan2(MY.player.s.y + 17 - e.s.y - 5, MY.player.s.x + 17 - e.s.x - 5);
+            e.vx = Math.cos(pi) * spd;
+            e.vy = Math.sin(pi) * spd;
+            console.log(pi + ": " + e.vx + ", " +e.vy);
+            break;
+    }
+    e.width = width;
+    e.height = height;
+    MY.g.rootScene.addChild(e.s);
+}
+
+// 単純な方向弾
+MY.eshotAlg0 = function(e) {
+    e.s.x += e.vx;
+    e.s.y += e.vy;
+    return !(360 < e.s.x || 360 < e.s.y || e.s.x < -e.width || e.s.y < -e.height);
+}
+
 // 初期化
 onload = function() {
     window.focus();
@@ -433,6 +489,7 @@ onload = function() {
         "image/player.png", "image/option.png", "image/fire1.png", "image/pafter.png",
         "image/pshot0.png", "image/pshot1.png", "image/pshot2.png", "image/pshot3.png", "image/pshot4.png",
         "image/enemy0.png",
+        "image/eshot0.png",
         "image/bomb0.png", "image/bomb1.png", "image/bomb2.png",
         "image/hit.png",
         "audio/pshot.ogg", "audio/hit.ogg", "audio/bomb0.ogg"
@@ -443,6 +500,7 @@ onload = function() {
         MY.initPlayer();
         MY.pshot = new Array();
         MY.enemy = new Array();
+        MY.eshot = new Array();
         MY.hit = new Array();
         MY.bomb = new Array();
         MY.pafter = new Array();
